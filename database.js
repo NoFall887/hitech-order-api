@@ -6,7 +6,7 @@ const orderSchema = new mongoose.Schema(
       required: true,
       type: String,
     },
-    // cart_id: { required: true, type: mongoose.Schema.Types.ObjectId },
+    cart_id: { required: true, type: mongoose.Schema.Types.ObjectId },
     // shipper_id: {
     //   required: true,
     //   type: mongoose.Schema.Types.ObjectId,

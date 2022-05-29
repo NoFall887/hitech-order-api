@@ -13,7 +13,7 @@ app.post("/order", (req, res) => {
     user_id: userId,
     payment_id: paymentId,
     // shipper_id: shipperId,
-    // cart_id: cartId,
+    cart_id: cartId,
     status_id: 1,
   });
 
@@ -52,7 +52,7 @@ app.get("/order", (req, res) => {
     .lookup({
       from: "cart",
       localField: "status_id",
-      foreignField: "status_id",
+      foreignField: "_id",
       as: "cart",
     })
     // .lookup({
@@ -61,7 +61,7 @@ app.get("/order", (req, res) => {
     //   foreignField: "",
     //   as: "shipper",
     // })
-    .unwind("status", "payment");
+    .unwind("status", "payment", "cart");
 });
 
 app.patch("/order/:orderId", async (req, res) => {
