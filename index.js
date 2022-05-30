@@ -12,13 +12,13 @@ app.post("/order", (req, res) => {
   const newOrder = new Orders({
     user_id: userId,
     payment_id: paymentId,
-    // shipper_id: shipperId,
+    shipper_id: shipperId,
     cart_id: cartId,
-    status_id: 1,
   });
 
   newOrder.save((err, data) => {
     if (err) {
+      console.log(err);
       return res.status(500).json({ status: false, message: "Error" });
     }
     console.log(data);
@@ -34,6 +34,7 @@ app.get("/order", (req, res) => {
       console.log(err);
       return res.status(500).json({ status: false, message: "Error" });
     }
+    console.log(data);
     return res.json({ data: data, status: true, message: "success" });
   })
     .match({ user_id: parseInt(userId) })
@@ -55,13 +56,13 @@ app.get("/order", (req, res) => {
       foreignField: "_id",
       as: "cart",
     })
-    // .lookup({
-    //   from: "shipper",
-    //   localField: "",
-    //   foreignField: "",
-    //   as: "shipper",
-    // })
-    .unwind("status", "payment", "cart");
+    .lookup({
+      from: "shipper",
+      localField: "shipper_id",
+      foreignField: "_id",
+      as: "shipper",
+    })
+    .unwind("status", "payment");
 });
 
 app.patch("/order/:orderId", async (req, res) => {

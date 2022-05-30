@@ -6,11 +6,16 @@ const orderSchema = new mongoose.Schema(
       required: true,
       type: String,
     },
-    cart_id: { required: true, type: mongoose.Schema.Types.ObjectId },
-    // shipper_id: {
-    //   required: true,
-    //   type: mongoose.Schema.Types.ObjectId,
-    // },
+    cart_id: {
+      required: true,
+      // type: mongoose.Schema.Types.ObjectId
+      type: mongoose.Schema.Types.Mixed,
+    },
+    shipper_id: {
+      required: true,
+      // type: mongoose.Schema.Types.ObjectId,
+      type: mongoose.Schema.Types.Mixed,
+    },
     status_id: {
       required: true,
       type: String,
@@ -18,7 +23,10 @@ const orderSchema = new mongoose.Schema(
     },
     user_id: { type: Number, required: true },
   },
-  { timestamps: { createdAt: "order_date", updatedAt: false } }
+  {
+    timestamps: { createdAt: "order_date", updatedAt: false },
+    versionKey: false,
+  }
 );
 
 const Orders = mongoose.model("orders", orderSchema);
