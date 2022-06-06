@@ -1,14 +1,27 @@
 const express = require("express");
 const mongoose = require("mongoose");
 const app = express();
+const jwt = require("jsonwebtoken");
 const { Orders } = require("./database");
 require("dotenv").config();
 
 app.use(express.json());
 mongoose.connect(process.env.DB_URL).catch((err) => console.log(err));
 
+// CREATE NEW ORDER
 app.post("/order", (req, res) => {
-  var { paymentId, shipperId, cartId, userId } = req.body;
+  var { paymentId, shipperId, cartId, token } = req.body;
+
+  if (token === null)
+    return res.status(401).json({ status: false, message: "unauthorized" });
+
+  try {
+    const decoded = jwt.verify(token, process.env.JWT_KEY);
+    var userId = parseInt(decoded.user_id);
+  } catch (error) {
+    res.status(400).json({ status: false, message: "Token not valid" });
+  }
+
   const newOrder = new Orders({
     user_id: userId,
     payment_id: paymentId,
@@ -26,6 +39,7 @@ app.post("/order", (req, res) => {
   });
 });
 
+// GET ORDERS BASED ON USER ID
 app.get("/order", (req, res) => {
   const { userId } = req.query;
 
@@ -34,7 +48,7 @@ app.get("/order", (req, res) => {
       console.log(err);
       return res.status(500).json({ status: false, message: "Error" });
     }
-    console.log(data);
+
     return res.json({ data: data, status: true, message: "success" });
   })
     .match({ user_id: parseInt(userId) })
@@ -62,9 +76,11 @@ app.get("/order", (req, res) => {
       foreignField: "_id",
       as: "shipper",
     })
-    .unwind("status", "payment");
+    .unwind("status", "payment")
+    .project({ status_id: 0, shipper_id: 0, payment_id: 0, cart_id: 0 });
 });
 
+// UPDATE ORDER STATUS
 app.patch("/order/:orderId", async (req, res) => {
   const { orderId } = req.params;
   const { newStatus } = req.body;
