@@ -2,10 +2,12 @@ const express = require("express");
 const mongoose = require("mongoose");
 const app = express();
 const jwt = require("jsonwebtoken");
+const cookieParser = require("cookie-parser");
 const { Orders } = require("./database");
 require("dotenv").config();
 
 app.use(express.json());
+app.use(cookieParser());
 mongoose.connect(process.env.DB_URL).catch((err) => console.log(err));
 
 // CREATE NEW ORDER
