@@ -13,12 +13,7 @@ app.use(express.json());
 app.use(cookieParser());
 mongoose.connect(process.env.DB_URL).catch((err) => console.log(err));
 
-app.use(function (req, res, next) {
-  res.setHeader('Access-Control-Allow-Origin', '*');
-  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS, PUT, PATCH, DELETE');
-  res.setHeader('Access-Control-Allow-Headers', 'X-Requested-With,Content-Type');
-  res.setHeader('Access-Control-Allow-Credentials', true);
-  next();});
+
 // CREATE NEW ORDER
 app.post("/order", (req, res) => {
   var { order_id, amount, payment_details, shipper_id, cart_id} = req.body;
