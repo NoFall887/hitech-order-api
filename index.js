@@ -17,22 +17,22 @@ mongoose.connect(process.env.DB_URL).catch((err) => console.log(err));
 // CREATE NEW ORDER
 app.post("/order", (req, res) => {
   var { order_id, amount, payment_details, shipper_id, cart_id} = req.body;
-  // const token  = req.cookies.access_token_cookie;
+  const token  = req.cookies.access_token_cookie;
 
-  // if (token === null)
-  //   return res.status(401).json({ status: false, message: "unauthorized" });
+  if (token === null)
+    return res.status(401).json({ status: false, message: "unauthorized" });
 
-  // try {
-  //   // const decoded = jwt.verify(token, process.env.JWT_KEY);
-  //   const decoded = jwt.verify(token, "project_paa");
-  //   var user_id = parseInt(decoded.id);
-  // } catch (error) {
-  //   res.status(400).json({ status: false, message: "Token not valid" });
-  // }
+  try {
+    // const decoded = jwt.verify(token, process.env.JWT_KEY);
+    const decoded = jwt.verify(token, "project_paa");
+    var user_id = parseInt(decoded.id);
+  } catch (error) {
+    res.status(400).json({ status: false, message: "Token not valid" });
+  }
 
   const newOrder = new Orders({
     order_id: order_id,
-    user_id: 5,
+    user_id: user_id,
     amount: amount,
     payment_details: payment_details,
     shipper_id: shipper_id,
