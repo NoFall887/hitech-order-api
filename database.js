@@ -2,10 +2,10 @@ const mongoose = require("mongoose");
 
 const orderSchema = new mongoose.Schema(
   {
-    payment_id: {
-      required: true,
-      type: String,
-    },
+    // payment_id: {
+    //   required: true,
+    //   type: String,
+    // },
     cart_id: {
       required: true,
       // type: mongoose.Schema.Types.ObjectId
@@ -22,6 +22,9 @@ const orderSchema = new mongoose.Schema(
       default: "1",
     },
     user_id: { type: Number, required: true },
+    order_id: { type: String, required: true },
+    amount: { type: Number, required: true },
+    payment_details: { type: Object, required: true },
   },
   {
     timestamps: { createdAt: "order_date", updatedAt: false },
