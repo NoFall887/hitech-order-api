@@ -70,13 +70,13 @@ app.get("/order", (req, res) => {
     })
     .lookup({
       from: "payment",
-      localField: "payment_id",
+      localField: "payment_details.payment_id",
       foreignField: "payment_id",
-      as: "payment",
+      as: "payment_details.payment",
     })
     .lookup({
       from: "cart",
-      localField: "status_id",
+      localField: "cart_id",
       foreignField: "_id",
       as: "cart",
     })
@@ -86,8 +86,8 @@ app.get("/order", (req, res) => {
       foreignField: "_id",
       as: "shipper",
     })
-    .unwind("status", "payment")
-    .project({ status_id: 0, shipper_id: 0, payment_id: 0, cart_id: 0 });
+    .unwind("status","payment_details.payment")
+    .project({ status_id: 0, shipper_id: 0, "payment_details.payment_id": 0, cart_id: 0 });
 });
 
 // UPDATE ORDER STATUS
