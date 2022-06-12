@@ -1,32 +1,42 @@
 const express = require("express");
 const mongoose = require("mongoose");
-const app = express();
 const jwt = require("jsonwebtoken");
+const cookieParser = require("cookie-parser");
+const cors = require('cors');
 const { Orders } = require("./database");
+
+const app = express();
 require("dotenv").config();
 
+app.use(cors());
 app.use(express.json());
+app.use(cookieParser());
 mongoose.connect(process.env.DB_URL).catch((err) => console.log(err));
+
 
 // CREATE NEW ORDER
 app.post("/order", (req, res) => {
-  var { paymentId, shipperId, cartId, token } = req.body;
+  var { order_id, amount, payment_details, shipper_id, cart_id} = req.body;
+  const token  = req.cookies.access_token_cookie;
 
   if (token === null)
     return res.status(401).json({ status: false, message: "unauthorized" });
 
   try {
-    const decoded = jwt.verify(token, process.env.JWT_KEY);
-    var userId = parseInt(decoded.user_id);
+    // const decoded = jwt.verify(token, process.env.JWT_KEY);
+    const decoded = jwt.verify(token, "project_paa");
+    var user_id = parseInt(decoded.id);
   } catch (error) {
     res.status(400).json({ status: false, message: "Token not valid" });
   }
 
   const newOrder = new Orders({
-    user_id: userId,
-    payment_id: paymentId,
-    shipper_id: shipperId,
-    cart_id: cartId,
+    order_id: order_id,
+    user_id: user_id,
+    amount: amount,
+    payment_details: payment_details,
+    shipper_id: shipper_id,
+    cart_id: cart_id,
   });
 
   newOrder.save((err, data) => {
@@ -60,13 +70,13 @@ app.get("/order", (req, res) => {
     })
     .lookup({
       from: "payment",
-      localField: "payment_id",
+      localField: "payment_details.payment_id",
       foreignField: "payment_id",
-      as: "payment",
+      as: "payment_details.payment",
     })
     .lookup({
       from: "cart",
-      localField: "status_id",
+      localField: "cart_id",
       foreignField: "_id",
       as: "cart",
     })
@@ -76,8 +86,8 @@ app.get("/order", (req, res) => {
       foreignField: "_id",
       as: "shipper",
     })
-    .unwind("status", "payment")
-    .project({ status_id: 0, shipper_id: 0, payment_id: 0, cart_id: 0 });
+    .unwind("status","payment_details.payment")
+    .project({ status_id: 0, shipper_id: 0, "payment_details.payment_id": 0, cart_id: 0 });
 });
 
 // UPDATE ORDER STATUS
