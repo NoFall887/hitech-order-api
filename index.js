@@ -29,7 +29,7 @@ function verifyToken(req, res, next) {
 }
 
 // CREATE NEW ORDER
-app.post("/order", verifyToken(req, res, next), (req, res) => {
+app.post("/order", verifyToken, (req, res) => {
   var { order_id, amount, payment_details, shipper_id, cart_id } = req.body;
 
   const newOrder = new Orders({
@@ -52,7 +52,7 @@ app.post("/order", verifyToken(req, res, next), (req, res) => {
 });
 
 // GET ORDERS BASED ON USER ID
-app.get("/order", verifyToken(req, res, next), (req, res) => {
+app.get("/order", verifyToken, (req, res) => {
   const { userId } = req.query;
 
   Orders.aggregate((err, data) => {
@@ -98,7 +98,7 @@ app.get("/order", verifyToken(req, res, next), (req, res) => {
 });
 
 // UPDATE ORDER STATUS
-app.patch("/order/:orderId", verifyToken(req, res, next), async (req, res) => {
+app.patch("/order/:orderId", verifyToken, async (req, res) => {
   const { orderId } = req.params;
   const { newStatus } = req.body;
   const statusIdRange = [1, 2, 3, 4];
