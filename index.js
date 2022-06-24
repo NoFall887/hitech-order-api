@@ -2,7 +2,7 @@ const express = require("express");
 const mongoose = require("mongoose");
 const jwt = require("jsonwebtoken");
 const cookieParser = require("cookie-parser");
-const cors = require('cors');
+const cors = require("cors");
 const { Orders } = require("./database");
 
 const app = express();
@@ -13,26 +13,28 @@ app.use(express.json());
 app.use(cookieParser());
 mongoose.connect(process.env.DB_URL).catch((err) => console.log(err));
 
-
-// CREATE NEW ORDER
-app.post("/order", (req, res) => {
-  var { order_id, amount, payment_details, shipper_id, cart_id} = req.body;
-  const token  = req.cookies.access_token_cookie;
-
-  if (token === null)
+function verifyToken(req, res, next) {
+  const token = req.cookies.access_token_cookie;
+  if (token === null || token == undefined)
     return res.status(401).json({ status: false, message: "unauthorized" });
 
   try {
-    // const decoded = jwt.verify(token, process.env.JWT_KEY);
-    const decoded = jwt.verify(token, "project_paa");
-    var user_id = parseInt(decoded.id);
+    const decoded = jwt.verify(token, process.env.JWT_KEY);
+
+    req.user_id = parseInt(decoded.id);
+    next();
   } catch (error) {
     res.status(400).json({ status: false, message: "Token not valid" });
   }
+}
+
+// CREATE NEW ORDER
+app.post("/order", verifyToken(req, res, next), (req, res) => {
+  var { order_id, amount, payment_details, shipper_id, cart_id } = req.body;
 
   const newOrder = new Orders({
     order_id: order_id,
-    user_id: user_id,
+    user_id: req.user_id,
     amount: amount,
     payment_details: payment_details,
     shipper_id: shipper_id,
@@ -50,7 +52,7 @@ app.post("/order", (req, res) => {
 });
 
 // GET ORDERS BASED ON USER ID
-app.get("/order", (req, res) => {
+app.get("/order", verifyToken(req, res, next), (req, res) => {
   const { userId } = req.query;
 
   Orders.aggregate((err, data) => {
@@ -86,12 +88,17 @@ app.get("/order", (req, res) => {
       foreignField: "_id",
       as: "shipper",
     })
-    .unwind("status","payment_details.payment")
-    .project({ status_id: 0, shipper_id: 0, "payment_details.payment_id": 0, cart_id: 0 });
+    .unwind("status", "payment_details.payment")
+    .project({
+      status_id: 0,
+      shipper_id: 0,
+      "payment_details.payment_id": 0,
+      cart_id: 0,
+    });
 });
 
 // UPDATE ORDER STATUS
-app.patch("/order/:orderId", async (req, res) => {
+app.patch("/order/:orderId", verifyToken(req, res, next), async (req, res) => {
   const { orderId } = req.params;
   const { newStatus } = req.body;
   const statusIdRange = [1, 2, 3, 4];

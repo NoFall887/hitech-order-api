@@ -2,10 +2,6 @@ const mongoose = require("mongoose");
 
 const orderSchema = new mongoose.Schema(
   {
-    // payment_id: {
-    //   required: true,
-    //   type: String,
-    // },
     cart_id: {
       required: true,
       // type: mongoose.Schema.Types.ObjectId
